@@ -25,10 +25,7 @@ jobs:
           cache: maven
 
       - name: Setup Chrome
-        id: chrome
         uses: browser-actions/setup-chrome@v1
 
       - name: Run TestNG Tests
         run: mvn clean test
-        env:
-          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
