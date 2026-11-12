@@ -1,5 +1,5 @@
 
-name: Maven TestNG Build
+name: Maven Selenium DockerHub CI
 
 on:
   push:
@@ -9,14 +9,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-push:
+
     runs-on: ubuntu-latest
 
     steps:
 
+      # Checkout GitHub Repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Setup Java
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
@@ -24,8 +27,25 @@ jobs:
           java-version: '17'
           cache: maven
 
+      # Install Chrome
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
 
-      - name: Run TestNG Tests
+      # Run TestNG Tests
+      - name: Run Maven Tests
         run: mvn clean test
+
+      # Login to DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build and Push Docker Image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/demo2:latest
